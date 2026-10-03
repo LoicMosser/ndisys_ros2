@@ -1,9 +1,9 @@
-cmake_minimum_required(VERSION 3.5)
+cmake_minimum_required(VERSION 3.16...3.28)
 project(ndi_hardware)
 
 # Default to C++14
 if(NOT CMAKE_CXX_STANDARD)
-  set(CMAKE_CXX_STANDARD 14)
+  set(CMAKE_CXX_STANDARD 20)
 endif()
 
 if(CMAKE_COMPILER_IS_GNUCXX OR CMAKE_CXX_COMPILER_ID MATCHES "Clang")
@@ -50,15 +50,17 @@ target_include_directories(
   include
   ${EXT_LIBS_DIR}
 )
-ament_target_dependencies(
+# ament_target_dependencies() was removed in ROS 2 Lyric (ament_cmake >= 2.8);
+# link against the modern namespaced imported targets instead.
+target_link_libraries(
   ${PROJECT_NAME}
-  hardware_interface
-  pluginlib
-  rclcpp
-  rclcpp_lifecycle
+  PUBLIC
+    ndicapi_library
+    hardware_interface::hardware_interface
+    pluginlib::pluginlib
+    rclcpp::rclcpp
+    rclcpp_lifecycle::rclcpp_lifecycle
 )
-
-target_link_libraries(${PROJECT_NAME} ndicapi_library yaml-cpp)
 
 # Causes the visibility macros to use dllexport rather than dllimport,
 # which is appropriate when building the dll but not consuming it.

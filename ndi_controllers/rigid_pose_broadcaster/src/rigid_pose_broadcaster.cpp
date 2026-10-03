@@ -30,7 +30,6 @@
 #include "hardware_interface/types/hardware_interface_type_values.hpp"
 #include "rclcpp/clock.hpp"
 #include "rclcpp/qos.hpp"
-#include "rclcpp/qos_event.hpp"
 #include "rclcpp/time.hpp"
 #include "rclcpp_lifecycle/lifecycle_node.hpp"
 #include "rcpputils/split.hpp"
@@ -124,18 +123,16 @@ RigidPoseBroadcaster::update(const rclcpp::Time & time, const rclcpp::Duration &
 {
   for (const auto & state_interface : state_interfaces_)
   {
-    mapStateValue[state_interface.get_name()] = state_interface.get_value();
+    mapStateValue[state_interface.get_name()] =
+      state_interface.get_optional<double>().value_or(kUninitializedValue);
     RCLCPP_DEBUG(get_node()->get_logger(),
-    "%s: %f\n", state_interface.get_name().c_str(), state_interface.get_value());
+    "%s: %f\n", state_interface.get_name().c_str(),
+    mapStateValue[state_interface.get_name()]);
   }
 
-  if (realtime_rigid_pose_publisher_ && realtime_rigid_pose_publisher_->trylock())
+  if (realtime_rigid_pose_publisher_ && realtime_rigid_pose_publisher_->can_publish())
   {
-    realtime_rigid_pose_publisher_->msg_.poses.clear();
-    realtime_rigid_pose_publisher_->msg_.ids.clear();
-    realtime_rigid_pose_publisher_->msg_.inbound.clear();
-
-    auto & rigidPoseMsg = realtime_rigid_pose_publisher_->msg_;
+    ndi_msgs::msg::RigidArray rigidPoseMsg;
     rigidPoseMsg.header.stamp = get_node()->get_clock()->now();
     rigidPoseMsg.header.frame_id = this->frameID;
 
@@ -169,7 +166,7 @@ RigidPoseBroadcaster::update(const rclcpp::Time & time, const rclcpp::Duration &
         rigidPoseMsg.frames.push_back(sensorName);
       }
     }
-    realtime_rigid_pose_publisher_->unlockAndPublish();
+    realtime_rigid_pose_publisher_->try_publish(rigidPoseMsg);
   }
 
   return controller_interface::return_type::OK;

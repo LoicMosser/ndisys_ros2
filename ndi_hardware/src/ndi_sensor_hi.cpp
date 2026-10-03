@@ -40,9 +40,9 @@ namespace ndi_hardware
 {
 // ------------------------------------------------------------------------------------------
 CallbackReturn NdiSensorHardwareInterface::on_init(
-  const hardware_interface::HardwareInfo & info)
+  const hardware_interface::HardwareComponentInterfaceParams & params)
 {
-    if (hardware_interface::SensorInterface::on_init(info) != CallbackReturn::SUCCESS){
+    if (hardware_interface::SensorInterface::on_init(params) != CallbackReturn::SUCCESS){
         return CallbackReturn::ERROR;
     }
 

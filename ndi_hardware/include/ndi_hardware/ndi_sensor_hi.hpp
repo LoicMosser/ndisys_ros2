@@ -47,7 +47,8 @@ public:
   RCLCPP_SHARED_PTR_DEFINITIONS(NdiSensorHardwareInterface);
 
   NDI_HARDWARE_PUBLIC
-  CallbackReturn on_init(const hardware_interface::HardwareInfo & info) override;
+  CallbackReturn on_init(
+    const hardware_interface::HardwareComponentInterfaceParams & params) override;
 
   NDI_HARDWARE_PUBLIC
   std::vector<hardware_interface::StateInterface> export_state_interfaces() override;
